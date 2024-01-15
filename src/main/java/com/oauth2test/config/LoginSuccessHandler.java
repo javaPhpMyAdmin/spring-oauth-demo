@@ -3,8 +3,13 @@ package com.oauth2test.config;
 import java.io.IOException;
 import java.util.Map;
 
+import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.server.ServletServerHttpResponse;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.core.OAuth2AccessToken.TokenType;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AccessTokenResponse;
+import org.springframework.security.oauth2.core.http.converter.OAuth2AccessTokenResponseHttpMessageConverter;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
 import org.springframework.stereotype.Component;
@@ -14,6 +19,7 @@ import jakarta.servlet.http.HttpServletResponse;
 
 @Component
 public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessHandler {
+  private final HttpMessageConverter<OAuth2AccessTokenResponse> accessTokenHttpResponseConverter = new OAuth2AccessTokenResponseHttpMessageConverter();
 
   @Override
   public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -30,8 +36,18 @@ public class LoginSuccessHandler extends SavedRequestAwareAuthenticationSuccessH
       }
     }
     System.out.println("Logged user: " + authentication.getName());
+    response.setHeader("token", "ASDASDASDASDASDAS");
+    response.addHeader("token", "AASASDASDAS");
+    response.containsHeader("header nameh");
+    response.sendRedirect("http://localhost:5173");
 
-    response.sendRedirect("/");
+    OAuth2AccessTokenResponse.Builder builder = OAuth2AccessTokenResponse.withToken("ADASDASDASDASJJ")
+        .tokenType(TokenType.BEARER);
+
+    OAuth2AccessTokenResponse accessTokenResponse = builder.build();
+    ServletServerHttpResponse httpResponse = new ServletServerHttpResponse(response);
+    this.accessTokenHttpResponseConverter.write(accessTokenResponse, null, httpResponse);
+
   }
 
 }
